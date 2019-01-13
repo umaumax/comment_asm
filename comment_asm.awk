@@ -25,7 +25,7 @@ true + /; exec gawk -f "$0"; exit; / {}
   const_description_dict["ldr"]="load"
   const_description_dict["ret"]="return"
 }
-match($0, /\.file ([0-9]*) "(.*)"$/, m) {
+match($0, /\.file[ \t]([0-9]*) "(.*)"$/, m) {
   fileno=m[1]
   filepath=m[2]
   files[fileno]=filepath
@@ -89,7 +89,7 @@ function const_description_line(line) {
 }
 
 function loc_line(line) {
-  if (match(line, /^\t\.loc ([0-9]*) ([0-9]*)/, m)) {
+  if (match(line, /^\t\.loc[ \t]([0-9]*) ([0-9]*)/, m)) {
     fileno=m[1]
     lineno=m[2]
     filepath=files[fileno]
