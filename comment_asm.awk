@@ -37,7 +37,7 @@ match($0, /\.file ([0-9]*) "(.*)"$/, m) {
     lines[NR]=line
     next
   }
-  if($1 !~ /^\./) {
+  if($1 !~ /^\./ && $1 !~ /^[0-9a-zA-Z_]*:/) {
     args=""
     # NOTE: その行に空白が文字列として含まれている場合にその表示が崩れる
     for(i=2;i<=NF;i++) {args=args""sprintf(" %+4s", $i)}
@@ -50,7 +50,8 @@ END {
   for(i=1;i<=NR;i++) {
     line=lines[i]
     if(!is_skip_line(line)) {
-      line=replace_line(line" # ")
+      comment=replace_line(line" # ")
+      line=add_line_to_comment(line, comment)
     }
     printf "%s\n", line;
   }
@@ -62,24 +63,29 @@ function is_skip_line(line) {
 }
 
 function replace_line(line) {
-  line=loc_line(line)
-  line=const_description_line(line)
-  return line
+  comment=loc_line(line)
+  if(comment!="") return comment
+  comment=const_description_line(line)
+  if(comment!="") return comment
+  return comment
 }
 
 function add_line_to_comment(line, comment) {
-  return sprintf("%s%s #", line, comment)
+  if(comment!="") {
+    return sprintf("%s # %s #", line, comment)
+  }
+  gsub(" *$", "", line)
+  return sprintf("%s", line)
 }
 
 function const_description_line(line) {
   for (key in const_description_dict) {
     val = const_description_dict[key]
     if (match(line, "\t"key, m)) {
-      line=add_line_to_comment(line, val)
-      break
+      return val
     }
   }
-  return line
+  return ""
 }
 
 function loc_line(line) {
@@ -91,7 +97,7 @@ function loc_line(line) {
     command | getline ret_line
     close(command)
     comment=sprintf("%-80s '%s:%d'", ret_line, filepath, lineno)
-    line=add_line_to_comment(line, comment)
+    return comment
   }
-  return line
+  return ""
 }
