@@ -3,6 +3,12 @@
 * for arm asm
 * for g++ asm(not clang++)
 
+## how to run
+```
+$ g++ -std=c++11 main.cpp -g -S
+$ cat main.s | ./comment_asm > main.comment.s
+```
+
 ## REQUIRED
 * gawk
 
